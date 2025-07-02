@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Revenue Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .chart-container {
+      position: relative;
+      height: 300px;
+    }
+    .highlight-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .highlight-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    .nav-btn.active {
+      position: relative;
+    }
+    .nav-btn.active:after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background-color: #4f46e5;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans">
+  <!-- Header -->
+  <header class="p-6 bg-white shadow-lg">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold text-indigo-700">Revenue Dashboard</h1>
+        <p class="text-gray-500 text-sm">Comprehensive Revenue Analytics</p>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div class="relative">
+          <i class="fas fa-bell text-gray-500 text-xl cursor-pointer hover:text-indigo-600"></i>
+          <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <div class="h-8 w-8 bg-indigo-600 rounded-full flex items-center justify-center text-white">JD</div>
+          <span class="hidden md:inline">John Doe</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-md mb-6 sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex space-x-1 py-3">
+        <button onclick="switchView('dashboard')" id="nav-dashboard" class="nav-btn px-4 py-2 rounded-lg hover:bg-indigo-50 text-gray-700 font-medium flex items-center space-x-2">
+          <i class="fas fa-chart-line"></i>
+          <span>Dashboard</span>
+        </button>
+        <button onclick="switchView('data')" id="nav-data" class="nav-btn px-4 py-2 rounded-lg hover:bg-indigo-50 text-gray-700 font-medium flex items-center space-x-2">
+          <i class="fas fa-table"></i>
+          <span>Data Table</span>
+        </button>
+        <button onclick="switchView('projections')" id="nav-projections" class="nav-btn px-4 py-2 rounded-lg hover:bg-indigo-50 text-gray-700 font-medium flex items-center space-x-2">
+          <i class="fas fa-chart-bar"></i>
+          <span>Projections</span>
+        </button>
+        <button onclick="switchView('settings')" id="nav-settings" class="nav-btn px-4 py-2 rounded-lg hover:bg-indigo-50 text-gray-700 font-medium flex items-center space-x-2 ml-auto">
+          <i class="fas fa-cog"></i>
+          <span>Settings</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 pb-10">
+    <!-- Dashboard View -->
+    <div id="dashboardView" class="animate-fade-in">
+      <!-- Summary Cards -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-xl shadow-md highlight-card">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-sm font-medium">Total Revenue</p>
+              <h2 id="totalRevenue" class="text-3xl font-bold mt-1">$0</h2>
+              <p class="text-sm mt-2"><span class="text-green-500"><i class="fas fa-arrow-up"></i> 12.5%</span> vs last period</p>
+            </div>
+            <div class="bg-indigo-100 p-3 rounded-lg text-indigo-600">
+              <i class="fas fa-dollar-sign text-xl"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-md highlight-card">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-sm font-medium">Avg. Monthly</p>
+              <h2 id="avgRevenue" class="text-3xl font-bold mt-1">$0</h2>
+              <p class="text-sm mt-2"><span class="text-green-500"><i class="fas fa-arrow-up"></i> 8.3%</span> vs last period</p>
+            </div>
+            <div class="bg-green-100 p-3 rounded-lg text-green-600">
+              <i class="fas fa-chart-bar text-xl"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-md highlight-card">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-sm font-medium">New Customers</p>
+              <h2 class="text-3xl font-bold mt-1">1,204</h2>
+              <p class="text-sm mt-2"><span class="text-red-500"><i class="fas fa-arrow-down"></i> 2.1%</span> vs last period</p>
+            </div>
+            <div class="bg-purple-100 p-3 rounded-lg text-purple-600">
+              <i class="fas fa-users text-xl"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-md highlight-card">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-sm font-medium">Q1 Target</p>
+              <h2 class="text-3xl font-bold mt-1">95.8%</h2>
+              <p class="text-sm mt-2"><span class="text-green-500"><i class="fas fa-arrow-up"></i> 5.2%</span> vs target</p>
+            </div>
+            <div class="bg-yellow-100 p-3 rounded-lg text-yellow-600">
+              <i class="fas fa-bullseye text-xl"></i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts Section -->
+      <section class="space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Monthly Revenue Trend -->
+          <div class="bg-white p-6 rounded-xl shadow-md">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-semibold">Monthly Revenue Trend</h3>
+              <div class="flex space-x-2">
+                <button onclick="updateChartTimeframe('monthly')" class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-md">Monthly</button>
+                <button onclick="updateChartTimeframe('quarterly')" class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md">Quarterly</button>
+                <button onclick="updateChartTimeframe('yearly')" class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md">Yearly</button>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="barChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- Revenue by Stream -->
+          <div class="bg-white p-6 rounded-xl shadow-md">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-semibold">Revenue by Stream</h3>
+              <div class="flex space-x-2">
+                <button onclick="updatePieChartView('percentage')" class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-md">%</button>
+                <button onclick="updatePieChartView('value')" class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md">Value</button>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="pieChart"></canvas>
+            </div>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Cumulative Revenue -->
+          <div class="bg-white p-6 rounded-xl shadow-md">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-semibold">Cumulative Revenue</h3>
+              <div class="flex space-x-2">
+                <button onclick="updateCumulativeChart('revenue')" class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-md">Revenue</button>
+                <button onclick="updateCumulativeChart('growth')" class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md">Growth</button>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="cumulativeChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- Revenue Forecast -->
+          <div class="bg-white p-6 rounded-xl shadow-md">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-semibold">Revenue Forecast</h3>
+              <div class="flex space-x-2">
+                <button onclick="updateForecastChart('6months')" class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-md">6M</button>
+                <button onclick="updateForecastChart('12months')" class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md">12M</button>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="forecastChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Recent Activity -->
+      <section class="mt-8">
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <h3 class="text-xl font-semibold mb-4">Recent Activity</h3>
+          <div class="space-y-4">
+            <div class="flex items-start p-3 hover:bg-gray-50 rounded-lg">
+              <div class="bg-green-100 p-2 rounded-full mr-3">
+                <i class="fas fa-dollar-sign text-green-600"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-medium">New revenue recorded</p>
+                <p class="text-sm text-gray-500">$4,500 from Product B in Apr 23</p>
+              </div>
+              <span class="text-sm text-gray-400">2h ago</span>
+            </div>
+            <div class="flex items-start p-3 hover:bg-gray-50 rounded-lg">
+              <div class="bg-blue-100 p-2 rounded-full mr-3">
+                <i class="fas fa-user-plus text-blue-600"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-medium">New customer acquisition</p>
+                <p class="text-sm text-gray-500">Acme Corp signed up for Services</p>
+              </div>
+              <span class="text-sm text-gray-400">5h ago</span>
+            </div>
+            <div class="flex items-start p-3 hover:bg-gray-50 rounded-lg">
+              <div class="bg-purple-100 p-2 rounded-full mr-3">
+                <i class="fas fa-chart-line text-purple-600"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-medium">Quarterly target achieved</p>
+                <p class="text-sm text-gray-500">Q1 revenue target exceeded by 5.8%</p>
+              </div>
+              <span class="text-sm text-gray-400">1d ago</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Data Table View -->
+    <div id="dataTableView" class="hidden animate-fade-in">
+      <section class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-semibold">Revenue Data</h3>
+          <div class="flex space-x-3">
+            <button onclick="exportToCSV()" class="px-4 py-2 bg-green-600 text-white rounded-md flex items-center space-x-2 hover:bg-green-700">
+              <i class="fas fa-file-export"></i>
+              <span>Export</span>
+            </button>
+            <button onclick="showImportModal()" class="px-4 py-2 bg-blue-600 text-white rounded-md flex items-center space-x-2 hover:bg-blue-700">
+              <i class="fas fa-file-import"></i>
+              <span>Import</span>
+            </button>
+          </div>
+        </div>
+        
+        <form id="addForm" class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+          <input type="text" placeholder="Month (e.g. Apr 23)" id="monthInput" required class="p-2 border rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+          <input type="number" placeholder="Product A ($)" id="productAInput" class="p-2 border rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+          <input type="number" placeholder="Product B ($)" id="productBInput" class="p-2 border rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+          <input type="number" placeholder="Services ($)" id="servicesInput" class="p-2 border rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+          <input type="number" placeholder="Ads ($)" id="adsInput" class="p-2 border rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+          <button type="submit" class="bg-indigo-600 text-white rounded p-2 hover:bg-indigo-700 flex items-center justify-center space-x-2">
+            <i class="fas fa-plus"></i>
+            <span>Add</span>
+          </button>
+        </form>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border rounded-lg overflow-hidden">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold">Month</th>
+                <th class="p-3 font-semibold">Product A</th>
+                <th class="p-3 font-semibold">Product B</th>
+                <th class="p-3 font-semibold">Services</th>
+                <th class="p-3 font-semibold">Ads</th>
+                <th class="p-3 font-semibold">Total</th>
+                <th class="p-3 font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody" class="divide-y"></tbody>
+          </table>
+        </div>
+        
+        <div class="flex justify-between items-center mt-4">
+          <div class="text-sm text-gray-500">
+            Showing <span id="startItem">1</span> to <span id="endItem">3</span> of <span id="totalItems">3</span> entries
+          </div>
+          <div class="flex space-x-2">
+            <button onclick="previousPage()" class="px-3 py-1 border rounded-md disabled:opacity-50" id="prevBtn" disabled>
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <button onclick="nextPage()" class="px-3 py-1 border rounded-md disabled:opacity-50" id="nextBtn">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Projections View -->
+    <div id="projectionsView" class="hidden animate-fade-in">
+      <section class="space-y-8">
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <h3 class="text-xl font-semibold mb-4">Revenue Projections</h3>
+          <div class="chart-container">
+            <canvas id="projectionsChart"></canvas>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="bg-white p-6 rounded-xl shadow-md">
+            <h3 class="text-xl font-semibold mb-4">Growth Rate Analysis</h3>
+            <div class="chart-container">
+              <canvas id="growthRateChart"></canvas>
+            </div>
+          </div>
+          
+          <div class="bg-white p-6 rounded-xl shadow-md">
+            <h3 class="text-xl font-semibold mb-4">Projection Parameters</h3>
+            <form class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Growth Rate (%)</label>
+                <input type="range" min="0" max="30" value="12" class="w-full" id="growthRateSlider" oninput="updateProjections()">
+                <div class="flex justify-between text-xs text-gray-500">
+                  <span>0%</span>
+                  <span id="growthRateValue">12%</span>
+                  <span>30%</span>
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Time Period</label>
+                <select id="timePeriodSelect" class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" onchange="updateProjections()">
+                  <option value="6">6 Months</option>
+                  <option value="12" selected>12 Months</option>
+                  <option value="24">24 Months</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Include Seasonality</label>
+                <div class="flex items-center space-x-4">
+                  <label class="inline-flex items-center">
+                    <input type="radio" name="seasonality" value="yes" checked class="h-4 w-4 text-indigo-600 focus:ring-indigo-500" onchange="updateProjections()">
+                    <span class="ml-2">Yes</span>
+                  </label>
+                  <label class="inline-flex items-center">
+                    <input type="radio" name="seasonality" value="no" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500" onchange="updateProjections()">
+                    <span class="ml-2">No</span>
+                  </label>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
+    
+    <!-- Settings View -->
+    <div id="settingsView" class="hidden animate-fade-in">
+      <section class="bg-white rounded-xl shadow-md p-6">
+        <h3 class="text-xl font-semibold mb-6">Dashboard Settings</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <h4 class="font-medium text-lg mb-4 text-gray-800">Display Preferences</h4>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <label class="text-gray-700">Dark Mode</label>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" value="" class="sr-only peer" id="darkModeToggle">
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Default View</label>
+                <select class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                  <option value="dashboard">Dashboard</option>
+                  <option value="data">Data Table</option>
+                  <option value="projections">Projections</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Chart Color Theme</label>
+                <div class="flex space-x-2">
+                  <button class="w-8 h-8 rounded-full bg-indigo-600 border-2 border-indigo-800"></button>
+                  <button class="w-8 h-8 rounded-full bg-green-600 border-2 border-transparent"></button>
+                  <button class="w-8 h-8 rounded-full bg-purple-600 border-2 border-transparent"></button>
+                  <button class="w-8 h-8 rounded-full bg-blue-600 border-2 border-transparent"></button>
+                  <button class="w-8 h-8 rounded-full bg-red-600 border-2 border-transparent"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <h4 class="font-medium text-lg mb-4 text-gray-800">Data Management</h4>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Data Refresh Frequency</label>
+                <select class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                  <option value="5">5 minutes</option>
+                  <option value="15" selected>15 minutes</option>
+                  <option value="30">30 minutes</option>
+                  <option value="60">1 hour</option>
+                  <option value="manual">Manual</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Data Retention</label>
+                <select class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                  <option value="30">30 days</option>
+                  <option value="90" selected>90 days</option>
+                  <option value="180">6 months</option>
+                  <option value="365">1 year</option>
+                  <option value="forever">Forever</option>
+                </select>
+              </div>
+              
+              <button onclick="showResetConfirmation()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center space-x-2">
+                <i class="fas fa-trash-alt"></i>
+                <span>Reset All Data</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Import Modal -->
+  <div id="importModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-semibold">Import Data</h3>
+        <button onclick="hideImportModal()" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Select CSV File</label>
+        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+          <i class="fas fa-file-csv text-4xl text-gray-400 mb-2"></i>
+          <p class="text-sm text-gray-500">Drag & drop your CSV file here or click to browse</p>
+          <input type="file" id="csvFileInput" class="hidden" accept=".csv">
+          <button onclick="document.getElementById('csvFileInput').click()" class="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+            Browse Files
+          </button>
+        </div>
+      </div>
+      <div class="flex justify-end space-x-3">
+        <button onclick="hideImportModal()" class="px-4 py-2 border rounded-md hover:bg-gray-50">
+          Cancel
+        </button>
+        <button onclick="importCSV()" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+          Import
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset Confirmation Modal -->
+  <div id="resetModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+      <div class="text-center">
+        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+          <i class="fas fa-exclamation text-red-600"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mt-3">Reset All Data?</h3>
+        <div class="mt-2 text-sm text-gray-500">
+          <p>This will permanently delete all revenue data and cannot be undone. Are you sure you want to proceed?</p>
+        </div>
+      </div>
+      <div class="mt-4 flex justify-end space-x-3">
+        <button onclick="hideResetConfirmation()" class="px-4 py-2 border rounded-md hover:bg-gray-50">
+          Cancel
+        </button>
+        <button onclick="resetAllData()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+          Reset
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Enhanced data with more months and additional fields
+    let revenueData = [
+      { id: 1, name: 'Jan 23', productA: 4200, productB: 2400, services: 1400, ads: 500, notes: 'Strong start to the year' },
+      { id: 2, name: 'Feb 23', productA: 3800, productB: 1398, services: 1210, ads: 450, notes: 'Valentine\'s Day promotion' },
+      { id: 3, name: 'Mar 23', productA: 2900, productB: 9800, services: 1290, ads: 600, notes: 'Product B launch' },
+      { id: 4, name: 'Apr 23', productA: 4100, productB: 4800, services: 1450, ads: 550, notes: 'Spring campaign' },
+      { id: 5, name: 'May 23', productA: 4500, productB: 3908, services: 1380, ads: 520, notes: '' },
+      { id: 6, name: 'Jun 23', productA: 4700, productB: 4300, services: 1520, ads: 580, notes: 'Mid-year review' }
+    ];
+
+    // Chart instances
+    let barChart, pieChart, cumulativeChart, forecastChart, projectionsChart, growthRateChart;
+    let currentPage = 1;
+    const itemsPerPage = 5;
+    let pieChartDisplayMode = 'percentage';
+    
+    // Initialize the dashboard
+    function initDashboard() {
+      updateCards();
+      updateTable();
+      drawCharts();
+      updatePagination();
+      switchView('dashboard');
+      
+      // Set up event listeners
+      document.getElementById('darkModeToggle').addEventListener('change', toggleDarkMode);
+    }
+    
+    // Update summary cards
+    function updateCards() {
+      const total = revenueData.reduce((acc, m) => acc + m.productA + m.productB + m.services + m.ads, 0);
+      const avg = total / revenueData.length;
+      document.getElementById('totalRevenue').textContent = `$${(total / 1000).toFixed(1)}k`;
+      document.getElementById('avgRevenue').textContent = `$${Math.round(avg).toLocaleString()}`;
+    }
+    
+    // Update data table with pagination
+    function updateTable() {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+      
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = Math.min(startIndex + itemsPerPage, revenueData.length);
+      const paginatedData = revenueData.slice(startIndex, endIndex);
+      
+      paginatedData.forEach((row) => {
+        const total = row.productA + row.productB + row.services + row.ads;
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50';
+        tr.innerHTML = `
+          <td class="p-3">${row.name}</td>
+          <td class="p-3 text-green-600 font-medium">$${row.productA.toLocaleString()}</td>
+          <td class="p-3 text-blue-600 font-medium">$${row.productB.toLocaleString()}</td>
+          <td class="p-3 text-yellow-600 font-medium">$${row.services.toLocaleString()}</td>
+          <td class="p-3 text-red-600 font-medium">$${row.ads.toLocaleString()}</td>
+          <td class="p-3 font-semibold">$${total.toLocaleString()}</td>
+          <td class="p-3">
+            <div class="flex space-x-2">
+              <button onclick="editRow(${row.id})" class="text-indigo-600 hover:text-indigo-900">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button onclick="deleteRow(${row.id})" class="text-red-600 hover:text-red-900">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      
+      // Update pagination info
+      document.getElementById('startItem').textContent = startIndex + 1;
+      document.getElementById('endItem').textContent = endIndex;
+      document.getElementById('totalItems').textContent = revenueData.length;
+      
+      // Update pagination buttons
+      document.getElementById('prevBtn').disabled = currentPage === 1;
+      document.getElementById('nextBtn').disabled = endIndex >= revenueData.length;
+    }
+    
+    // Draw all charts
+    function drawCharts() {
+      drawBarChart();
+      drawPieChart();
+      drawCumulativeChart();
+      drawForecastChart();
+      drawProjectionsChart();
+      drawGrowthRateChart();
+    }
+    
+    // Draw bar chart
+    function drawBarChart() {
+      const ctx = document.getElementById('barChart').getContext('2d');
+      const labels = revenueData.map(r => r.name);
+      const dataA = revenueData.map(r => r.productA);
+      const dataB = revenueData.map(r => r.productB);
+      const dataS = revenueData.map(r => r.services);
+      const dataAd = revenueData.map(r => r.ads);
+      
+      if (barChart) barChart.destroy();
+      
+      barChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            { 
+              label: 'Product A', 
+              data: dataA, 
+              backgroundColor: '#3b82f6',
+              borderColor: '#2563eb',
+              borderWidth: 1
+            },
+            { 
+              label: 'Product B', 
+              data: dataB, 
+              backgroundColor: '#10b981',
+              borderColor: '#059669',
+              borderWidth: 1
+            },
+            { 
+              label: 'Services', 
+              data: dataS, 
+              backgroundColor: '#f59e0b',
+              borderColor: '#d97706',
+              borderWidth: 1
+            },
+            { 
+              label: 'Ads', 
+              data: dataAd, 
+              backgroundColor: '#ef4444',
+              borderColor: '#dc2626',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { 
+            legend: { 
+              position: 'top',
+              labels: {
+                boxWidth: 12,
+                padding: 20
+              }
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return '$' + value.toLocaleString();
+                }
+              }
+            }
+          },
+          interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
+          }
+        }
+      });
+    }
+    
+    // Draw pie chart
+    function drawPieChart() {
+      const ctx = document.getElementById('pieChart').getContext('2d');
+      const streamTotals = [
+        revenueData.reduce((a, r) => a + r.productA, 0),
+        revenueData.reduce((a, r) => a + r.productB, 0),
+        revenueData.reduce((a, r) => a + r.services, 0),
+        revenueData.reduce((a, r) => a + r.ads, 0)
+      ];
+      const total = streamTotals.reduce((a, b) => a + b, 0);
+      
+      if (pieChart) pieChart.destroy();
+      
+      pieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: ['Product A', 'Product B', 'Services', 'Ads'],
+          datasets: [{
+            data: streamTotals,
+            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+            borderColor: '#fff',
+            borderWidth: 2
+          }]
+        },
+        plugins: [ChartDataLabels],
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                boxWidth: 12,
+                padding: 20
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.raw || 0;
+                  const percentage = Math.round((value / total) * 100);
+                  return `${label}: $${value.toLocaleString()} (${percentage}%)`;
+                }
+              }
+            },
+            datalabels: {
+              formatter: (value, ctx) => {
+                if (pieChartDisplayMode === 'percentage') {
+                  const percentage = Math.round((value / total) * 100);
+                  return `${percentage}%`;
+                } else {
+                  return `$${value.toLocaleString()}`;
+                }
+              },
+              color: '#fff',
+              font: {
+                weight: 'bold',
+                size: 12
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Draw cumulative chart
+    function drawCumulativeChart() {
+      const ctx = document.getElementById('cumulativeChart').getContext('2d');
+      const labels = revenueData.map(r => r.name);
+      const cumulative = [];
+      let sum = 0;
+      revenueData.forEach(r => {
+        sum += r.productA + r.productB + r.services + r.ads;
+        cumulative.push(sum);
+      });
+      
+      if (cumulativeChart) cumulativeChart.destroy();
+      
+      cumulativeChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Cumulative Revenue',
+            data: cumulative,
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99,102,241,0.1)',
+            fill: true,
+            tension: 0.3,
+            pointBackgroundColor: '#6366f1',
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                boxWidth: 12,
+                padding: 20
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `$${context.raw.toLocaleString()}`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return '$' + value.toLocaleString();
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Draw forecast chart
+    function drawForecastChart() {
+      const ctx = document.getElementById('forecastChart').getContext('2d');
+      const labels = revenueData.map(r => r.name);
+      const totalRevenue = revenueData.map(r => r.productA + r.productB + r.services + r.ads);
+      
+      // Simple forecast - extending last 3 months average
+      const last3Months = totalRevenue.slice(-3);
+      const avg = last3Months.reduce((a, b) => a + b, 0) / last3Months.length;
+      const forecast = Array(6).fill(0).map((_, i) => avg * (1 + (i * 0.05))); // 5% growth each month
+      
+      const forecastLabels = [...labels];
+      for (let i = 1; i <= 6; i++) {
+        forecastLabels.push(`F ${i}`);
+      }
+      
+      if (forecastChart) forecastChart.destroy();
+      
+      forecastChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: forecastLabels,
+          datasets: [
+            {
+              label: 'Actual Revenue',
+              data: [...totalRevenue, ...Array(6).fill(null)],
+              borderColor: '#6366f1',
+              backgroundColor: 'rgba(99,102,241,0.1)',
+              fill: false,
+              tension: 0.3,
+              pointBackgroundColor: '#6366f1',
+              pointRadius: 4,
+              pointHoverRadius: 6
+            },
+            {
+              label: 'Forecast',
+              data: [...Array(totalRevenue.length).fill(null), ...forecast],
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16,185,129,0.1)',
+              fill: false,
+              borderDash: [5, 5],
+              tension: 0.3,
+              pointBackgroundColor: '#10b981',
+              pointRadius: 4,
+              pointHoverRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                boxWidth: 12,
+                padding: 20
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: $${context.raw ? context.raw.toLocaleString() : 'N/A'}`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return '$' + value.toLocaleString();
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Draw projections chart
+    function drawProjectionsChart() {
+      const ctx = document.getElementById('projectionsChart').getContext('2d');
+      const labels = revenueData.map(r => r.name);
+      const totalRevenue = revenueData.map(r => r.productA + r.productB + r.services + r.ads);
+      
+      if (projectionsChart) projectionsChart.destroy();
+      
+      projectionsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Actual Revenue',
+              data: totalRevenue,
+              borderColor: '#6366f1',
+              backgroundColor: 'rgba(99,102,241,0.1)',
+              fill: false,
+              tension: 0.3,
+              pointBackgroundColor: '#6366f1',
+              pointRadius: 4,
+              pointHoverRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                boxWidth: 12,
+                padding: 20
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `$${context.raw.toLocaleString()}`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return '$' + value.toLocaleString();
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      updateProjections();
+    }
+    
+    // Draw growth rate chart
+    function drawGrowthRateChart() {
+      const ctx = document.getElementById('growthRateChart').getContext('2d');
+      const labels = revenueData.map(r => r.name).slice(1);
+      const totalRevenue = revenueData.map(r => r.productA + r.productB + r.services + r.ads);
+      
+      // Calculate month-over-month growth rates
+      const growthRates = [];
+      for (let i = 1; i < totalRevenue.length; i++) {
+        const growth = ((totalRevenue[i] - totalRevenue[i-1]) / totalRevenue[i-1]) * 100;
+        growthRates.push(growth);
+      }
+      
+      if (growthRateChart) growthRateChart.destroy();
+      
+      growthRateChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'MoM Growth Rate',
+            data: growthRates,
+            backgroundColor: growthRates.map(rate => 
+              rate >= 0 ? 'rgba(16,185,129,0.7)' : 'rgba(239,68,68,0.7)'
+            ),
+            borderColor: growthRates.map(rate => 
+              rate >= 0 ? 'rgba(16,185,129,1)' : 'rgba(239,68,68,1)'
+            ),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.raw.toFixed(1)}%`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              ticks: {
+                callback: function(value) {
+                  return value + '%';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Update projections based on user inputs
+    function updateProjections() {
+      const growthRate = parseInt(document.getElementById('growthRateSlider').value);
+      document.getElementById('growthRateValue').textContent = growthRate + '%';
+      
+      const timePeriod = parseInt(document.getElementById('timePeriodSelect').value);
+      const includeSeasonality = document.querySelector('input[name="seasonality"]:checked').value === 'yes';
+      
+      const totalRevenue = revenueData.map(r => r.productA + r.productB + r.services + r.ads);
+      const lastRevenue = totalRevenue[totalRevenue.length - 1];
+      
+      // Generate projection data
+      const projectionData = [];
+      for (let i = 1; i <= timePeriod; i++) {
+        let projectedValue = lastRevenue * Math.pow(1 + (growthRate / 100), i);
+        
+        // Simple seasonality adjustment
+        if (includeSeasonality) {
+          const seasonalityFactor = 1 + (0.1 * Math.sin(i * Math.PI / 6)); // Sinusoidal pattern
+          projectedValue *= seasonalityFactor;
+        }
+        
+        projectionData.push(projectedValue);
+      }
+      
+      // Update chart data
+      const projectionLabels = [];
+      for (let i = 1; i <= timePeriod; i++) {
+        projectionLabels.push(`P ${i}`);
+      }
+      
+      projectionsChart.data.labels = [...revenueData.map(r => r.name), ...projectionLabels];
+      projectionsChart.data.datasets = [
+        {
+          label: 'Actual Revenue',
+          data: [...totalRevenue, ...Array(timePeriod).fill(null)],
+          borderColor: '#6366f1',
+          backgroundColor: 'rgba(99,102,241,0.1)',
+          fill: false,
+          tension: 0.3,
+          pointBackgroundColor: '#6366f1',
+          pointRadius: 4,
+          pointHoverRadius: 6
+        },
+        {
+          label: 'Projection',
+          data: [...Array(totalRevenue.length).fill(null), ...projectionData],
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16,185,129,0.1)',
+          fill: false,
+          borderDash: [5, 5],
+          tension: 0.3,
+          pointBackgroundColor: '#10b981',
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }
+      ];
+      
+      projectionsChart.update();
+    }
+    
+    // Update bar chart timeframe
+    function updateChartTimeframe(timeframe) {
+      // In a real app, this would fetch different data based on timeframe
+      // For demo, we'll just update the chart title
+      const title = timeframe === 'monthly' ? 'Monthly Revenue Trend' : 
+                   timeframe === 'quarterly' ? 'Quarterly Revenue Trend' : 'Yearly Revenue Trend';
+      barChart.options.plugins.title = { display: true, text: title };
+      barChart.update();
+    }
+    
+    // Update pie chart view mode
+    function updatePieChartView(mode) {
+      pieChartDisplayMode = mode;
+      pieChart.update();
+    }
+    
+    // Update cumulative chart view
+    function updateCumulativeChart(view) {
+      const title = view === 'revenue' ? 'Cumulative Revenue' : 'Revenue Growth';
+      cumulativeChart.options.plugins.title = { display: true, text: title };
+      cumulativeChart.update();
+    }
+    
+    // Update forecast chart timeframe
+    function updateForecastChart(timeframe) {
+      forecastChart.data.datasets[1].data = [...Array(revenueData.length).fill(null), 
+        ...(timeframe === '6months' ? generateForecast(6) : generateForecast(12))];
+      forecastChart.update();
+    }
+    
+    // Generate forecast data
+    function generateForecast(months) {
+      const totalRevenue = revenueData.map(r => r.productA + r.productB + r.services + r.ads);
+      const last3Months = totalRevenue.slice(-3);
+      const avg = last3Months.reduce((a, b) => a + b, 0) / last3Months.length;
+      return Array(months).fill(0).map((_, i) => avg * (1 + (i * 0.05)));
+    }
+    
+    // Add new revenue data
+    document.getElementById('addForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const newId = revenueData.length > 0 ? Math.max(...revenueData.map(r => r.id)) + 1 : 1;
+      
+      revenueData.push({
+        id: newId,
+        name: document.getElementById('monthInput').value,
+        productA: parseInt(document.getElementById('productAInput').value) || 0,
+        productB: parseInt(document.getElementById('productBInput').value) || 0,
+        services: parseInt(document.getElementById('servicesInput').value) || 0,
+        ads: parseInt(document.getElementById('adsInput').value) || 0,
+        notes: ''
+      });
+      
+      // Reset form
+      this.reset();
+      
+      // Update UI
+      updateCards();
+      updateTable();
+      updatePagination();
+      drawCharts();
+      
+      // Show success message
+      showToast('Data added successfully!', 'success');
+    });
+    
+    // Edit row
+    function editRow(id) {
+      const row = revenueData.find(r => r.id === id);
+      if (!row) return;
+      
+      document.getElementById('monthInput').value = row.name;
+      document.getElementById('productAInput').value = row.productA;
+      document.getElementById('productBInput').value = row.productB;
+      document.getElementById('servicesInput').value = row.services;
+      document.getElementById('adsInput').value = row.ads;
+      
+      // Change add button to update button
+      const form = document.getElementById('addForm');
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.innerHTML = '<i class="fas fa-save"></i><span>Update</span>';
+      submitBtn.className = 'bg-blue-600 text-white rounded p-2 hover:bg-blue-700 flex items-center justify-center space-x-2';
+      
+      // Remove previous event listener
+      form.removeEventListener('submit', form._updateHandler);
+      
+      // Add update handler
+      const updateHandler = function(e) {
+        e.preventDefault();
+        
+        row.name = document.getElementById('monthInput').value;
+        row.productA = parseInt(document.getElementById('productAInput').value) || 0;
+        row.productB = parseInt(document.getElementById('productBInput').value) || 0;
+        row.services = parseInt(document.getElementById('servicesInput').value) || 0;
+        row.ads = parseInt(document.getElementById('adsInput').value) || 0;
+        
+        // Reset form and button
+        form.reset();
+        submitBtn.innerHTML = '<i class="fas fa-plus"></i><span>Add</span>';
+        submitBtn.className = 'bg-indigo-600 text-white rounded p-2 hover:bg-indigo-700 flex items-center justify-center space-x-2';
+        
+        // Remove update handler and re-add submit handler
+        form.removeEventListener('submit', updateHandler);
+        form.addEventListener('submit', form._submitHandler);
+        
+        // Update UI
+        updateCards();
+        updateTable();
+        drawCharts();
+        
+        // Show success message
+        showToast('Data updated successfully!', 'success');
+      };
+      
+      // Store handlers for later removal
+      form._updateHandler = updateHandler;
+      form._submitHandler = form._submitHandler || form.querySelector('button[type="submit"]').onclick;
+      
+      form.addEventListener('submit', updateHandler);
+    }
+    
+    // Delete row
+    function deleteRow(id) {
+      if (confirm('Are you sure you want to delete this record?')) {
+        revenueData = revenueData.filter(r => r.id !== id);
+        updateCards();
+        updateTable();
+        updatePagination();
+        drawCharts();
+        showToast('Data deleted successfully!', 'success');
+      }
+    }
+    
+    // Pagination functions
+    function nextPage() {
+      if (currentPage * itemsPerPage < revenueData.length) {
+        currentPage++;
+        updateTable();
+        updatePagination();
+      }
+    }
+    
+    function previousPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        updateTable();
+        updatePagination();
+      }
+    }
+    
+    function updatePagination() {
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = Math.min(startIndex + itemsPerPage, revenueData.length);
+      
+      document.getElementById('startItem').textContent = startIndex + 1;
+      document.getElementById('endItem').textContent = endIndex;
+      document.getElementById('totalItems').textContent = revenueData.length;
+      
+      document.getElementById('prevBtn').disabled = currentPage === 1;
+      document.getElementById('nextBtn').disabled = endIndex >= revenueData.length;
+    }
+    
+    // Switch between views
+    function switchView(view) {
+      const sections = {
+        dashboard: 'dashboardView',
+        data: 'dataTableView',
+        projections: 'projectionsView',
+        settings: 'settingsView'
+      };
+      
+      // Update active nav button
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-indigo-600', 'text-white');
+        btn.classList.add('text-gray-700');
+      });
+      
+      const activeBtn = document.getElementById('nav-' + view);
+      activeBtn.classList.add('active');
+      activeBtn.classList.remove('text-gray-700');
+      
+      // Show/hide sections
+      Object.keys(sections).forEach(key => {
+        const el = document.getElementById(sections[key]);
+        if (key === view) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+      
+      // Redraw charts when switching to their views
+      if (view === 'projections') {
+        updateProjections();
+      }
+    }
+    
+    // Export to CSV
+    function exportToCSV() {
+      const headers = ['Month', 'Product A', 'Product B', 'Services', 'Ads', 'Total', 'Notes'];
+      const data = revenueData.map(row => [
+        row.name,
+        row.productA,
+        row.productB,
+        row.services,
+        row.ads,
+        row.productA + row.productB + row.services + row.ads,
+        row.notes || ''
+      ]);
+      
+      let csv = headers.join(',') + '\n';
+      data.forEach(row => {
+        csv += row.map(item => `"${item}"`).join(',') + '\n';
+      });
+      
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'revenue_data.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      showToast('Data exported to CSV!', 'success');
+    }
+    
+    // Show import modal
+    function showImportModal() {
+      document.getElementById('importModal').classList.remove('hidden');
+    }
+    
+    // Hide import modal
+    function hideImportModal() {
+      document.getElementById('importModal').classList.add('hidden');
+    }
+    
+    // Import CSV
+    function importCSV() {
+      const fileInput = document.getElementById('csvFileInput');
+      if (!fileInput.files.length) {
+        showToast('Please select a CSV file first!', 'error');
+        return;
+      }
+      
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        try {
+          const content = e.target.result;
+          const lines = content.split('\n');
+          const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+          
+          // Simple CSV parsing (in a real app you'd use a proper CSV parser)
+          const newData = [];
+          for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
+            
+            const values = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.trim().replace(/"/g, ''));
+            const row = {};
+            
+            for (let j = 0; j < headers.length; j++) {
+              if (j < values.length) {
+                row[headers[j].toLowerCase().replace(' ', '')] = values[j];
+              }
+            }
+            
+            // Convert to our data format
+            if (row.month && (row.producta || row.productb || row.services || row.ads)) {
+              newData.push({
+                id: revenueData.length + newData.length + 1,
+                name: row.month,
+                productA: parseInt(row.producta) || 0,
+                productB: parseInt(row.productb) || 0,
+                services: parseInt(row.services) || 0,
+                ads: parseInt(row.ads) || 0,
+                notes: row.notes || ''
+              });
+            }
+          }
+          
+          if (newData.length > 0) {
+            revenueData = [...revenueData, ...newData];
+            updateCards();
+            updateTable();
+            drawCharts();
+            hideImportModal();
+            showToast(`Imported ${newData.length} records successfully!`, 'success');
+          } else {
+            showToast('No valid data found in CSV!', 'error');
+          }
+        } catch (error) {
+          console.error('Error parsing CSV:', error);
+          showToast('Error parsing CSV file!', 'error');
+        }
+      };
+      
+      reader.readAsText(file);
+    }
+    
+    // Show reset confirmation
+    function showResetConfirmation() {
+      document.getElementById('resetModal').classList.remove('hidden');
+    }
+    
+    // Hide reset confirmation
+    function hideResetConfirmation() {
+      document.getElementById('resetModal').classList.add('hidden');
+    }
+    
+    // Reset all data
+    function resetAllData() {
+      revenueData = [
+        { id: 1, name: 'Jan 23', productA: 4200, productB: 2400, services: 1400, ads: 500, notes: 'Strong start to the year' },
+        { id: 2, name: 'Feb 23', productA: 3800, productB: 1398, services: 1210, ads: 450, notes: 'Valentine\'s Day promotion' },
+        { id: 3, name: 'Mar 23', productA: 2900, productB: 9800, services: 1290, ads: 600, notes: 'Product B launch' }
+      ];
+      
+      updateCards();
+      updateTable();
+      drawCharts();
+      hideResetConfirmation();
+      showToast('Data reset to default values!', 'success');
+    }
+    
+    // Toggle dark mode
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+      // In a real app, you would save this preference to localStorage
+    }
+    
+    // Show toast notification
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-md shadow-lg text-white ${
+        type === 'success' ? 'bg-green-600' : 'bg-red-600'
+      } animate-fade-in`;
+      toast.innerHTML = `
+        <div class="flex items-center space-x-2">
+          <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+    
+    // Initialize the dashboard when DOM is loaded
+    document.addEventListener('DOMContentLoaded', initDashboard);
+  </script>
+</body>
+</html>
